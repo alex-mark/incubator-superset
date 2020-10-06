@@ -171,7 +171,7 @@ export default function(bootstrapData) {
       }
 
       // build DashboardFilters for interactive filter features
-      if (slice.form_data.viz_type === 'filter_box') {
+      if (slice.form_data.filter_configs && slice.form_data.filter_configs.length > 0) {
         const configs = getFilterConfigsFromFormdata(slice.form_data);
         let columns = configs.columns;
         const labels = configs.labels;
