@@ -17,59 +17,64 @@
  * under the License.
  */
 /* eslint camelcase: 0 */
-import { ActionCreators as UndoActionCreators } from 'redux-undo';
-import { t, SupersetClient } from '@superset-ui/core';
+import {ActionCreators as UndoActionCreators} from 'redux-undo';
+import {t, SupersetClient} from '@superset-ui/core';
 
-import { addChart, removeChart, refreshChart } from '../../chart/chartAction';
-import { chart as initChart } from '../../chart/chartReducer';
-import { fetchDatasourceMetadata } from './datasources';
+import {addChart, removeChart, refreshChart} from '../../chart/chartAction';
+import {chart as initChart} from '../../chart/chartReducer';
+import {fetchDatasourceMetadata} from './datasources';
 import {
   addFilter,
   removeFilter,
   updateDirectPathToFilter,
 } from './dashboardFilters';
-import { applyDefaultFormData } from '../../explore/store';
+import {applyDefaultFormData} from '../../explore/store';
 import getClientErrorObject from '../../utils/getClientErrorObject';
-import { SAVE_TYPE_OVERWRITE } from '../util/constants';
+import {SAVE_TYPE_OVERWRITE} from '../util/constants';
 import {
   addSuccessToast,
   addWarningToast,
   addDangerToast,
 } from '../../messageToasts/actions';
-import { UPDATE_COMPONENTS_PARENTS_LIST } from './dashboardLayout';
+import {UPDATE_COMPONENTS_PARENTS_LIST} from './dashboardLayout';
 import serializeActiveFilterValues from '../util/serializeActiveFilterValues';
 import serializeFilterScopes from '../util/serializeFilterScopes';
-import { getActiveFilters } from '../util/activeDashboardFilters';
-import { safeStringify } from '../../utils/safeStringify';
+import {getActiveFilters} from '../util/activeDashboardFilters';
+import {safeStringify} from '../../utils/safeStringify';
 
 export const SET_UNSAVED_CHANGES = 'SET_UNSAVED_CHANGES';
+
 export function setUnsavedChanges(hasUnsavedChanges) {
-  return { type: SET_UNSAVED_CHANGES, payload: { hasUnsavedChanges } };
+  return {type: SET_UNSAVED_CHANGES, payload: {hasUnsavedChanges}};
 }
 
 export const ADD_SLICE = 'ADD_SLICE';
+
 export function addSlice(slice) {
-  return { type: ADD_SLICE, slice };
+  return {type: ADD_SLICE, slice};
 }
 
 export const REMOVE_SLICE = 'REMOVE_SLICE';
+
 export function removeSlice(sliceId) {
-  return { type: REMOVE_SLICE, sliceId };
+  return {type: REMOVE_SLICE, sliceId};
 }
 
 const FAVESTAR_BASE_URL = '/superset/favstar/Dashboard';
 export const TOGGLE_FAVE_STAR = 'TOGGLE_FAVE_STAR';
+
 export function toggleFaveStar(isStarred) {
-  return { type: TOGGLE_FAVE_STAR, isStarred };
+  return {type: TOGGLE_FAVE_STAR, isStarred};
 }
 
 export const FETCH_FAVE_STAR = 'FETCH_FAVE_STAR';
+
 export function fetchFaveStar(id) {
   return function fetchFaveStarThunk(dispatch) {
     return SupersetClient.get({
       endpoint: `${FAVESTAR_BASE_URL}/${id}/count/`,
     })
-      .then(({ json }) => {
+      .then(({json}) => {
         if (json.count > 0) dispatch(toggleFaveStar(true));
       })
       .catch(() =>
@@ -85,6 +90,7 @@ export function fetchFaveStar(id) {
 }
 
 export const SAVE_FAVE_STAR = 'SAVE_FAVE_STAR';
+
 export function saveFaveStar(id, isStarred) {
   return function saveFaveStarThunk(dispatch) {
     const urlSuffix = isStarred ? 'unselect' : 'select';
@@ -103,15 +109,16 @@ export function saveFaveStar(id, isStarred) {
 }
 
 export const TOGGLE_PUBLISHED = 'TOGGLE_PUBLISHED';
+
 export function togglePublished(isPublished) {
-  return { type: TOGGLE_PUBLISHED, isPublished };
+  return {type: TOGGLE_PUBLISHED, isPublished};
 }
 
 export function savePublished(id, isPublished) {
   return function savePublishedThunk(dispatch) {
     return SupersetClient.put({
       endpoint: `/api/v1/dashboard/${id}`,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         published: isPublished,
       }),
@@ -132,33 +139,39 @@ export function savePublished(id, isPublished) {
 }
 
 export const TOGGLE_EXPAND_SLICE = 'TOGGLE_EXPAND_SLICE';
+
 export function toggleExpandSlice(sliceId) {
-  return { type: TOGGLE_EXPAND_SLICE, sliceId };
+  return {type: TOGGLE_EXPAND_SLICE, sliceId};
 }
 
 export const UPDATE_CSS = 'UPDATE_CSS';
+
 export function updateCss(css) {
-  return { type: UPDATE_CSS, css };
+  return {type: UPDATE_CSS, css};
 }
 
 export const SET_EDIT_MODE = 'SET_EDIT_MODE';
+
 export function setEditMode(editMode) {
-  return { type: SET_EDIT_MODE, editMode };
+  return {type: SET_EDIT_MODE, editMode};
 }
 
 export const ON_CHANGE = 'ON_CHANGE';
+
 export function onChange() {
-  return { type: ON_CHANGE };
+  return {type: ON_CHANGE};
 }
 
 export const ON_SAVE = 'ON_SAVE';
+
 export function onSave() {
-  return { type: ON_SAVE };
+  return {type: ON_SAVE};
 }
 
 export const SET_REFRESH_FREQUENCY = 'SET_REFRESH_FREQUENCY';
+
 export function setRefreshFrequency(refreshFrequency, isPersistent = false) {
-  return { type: SET_REFRESH_FREQUENCY, refreshFrequency, isPersistent };
+  return {type: SET_REFRESH_FREQUENCY, refreshFrequency, isPersistent};
 }
 
 export function saveDashboardRequestSuccess() {
@@ -173,12 +186,12 @@ export function saveDashboardRequest(data, id, saveType) {
   const path = saveType === SAVE_TYPE_OVERWRITE ? 'save_dash' : 'copy_dash';
 
   return (dispatch, getState) => {
-    dispatch({ type: UPDATE_COMPONENTS_PARENTS_LIST });
+    dispatch({type: UPDATE_COMPONENTS_PARENTS_LIST});
 
-    const { dashboardFilters, dashboardLayout } = getState();
+    const {dashboardFilters, dashboardLayout} = getState();
     const layout = dashboardLayout.present;
     Object.values(dashboardFilters).forEach(filter => {
-      const { chartId } = filter;
+      const {chartId} = filter;
       const componentId = filter.directPathToFilter.slice().pop();
       const directPathToFilter = (layout[componentId].parents || []).slice();
       directPathToFilter.push(componentId);
@@ -204,7 +217,7 @@ export function saveDashboardRequest(data, id, saveType) {
         return response;
       })
       .catch(response =>
-        getClientErrorObject(response).then(({ error }) =>
+        getClientErrorObject(response).then(({error}) =>
           dispatch(
             addDangerToast(
               `${t(
@@ -231,7 +244,7 @@ export function fetchCharts(
       return;
     }
 
-    const { metadata: meta } = getState().dashboardInfo;
+    const {metadata: meta} = getState().dashboardInfo;
     const refreshTime = Math.max(interval, meta.stagger_time || 5000); // default 5 seconds
     if (typeof meta.stagger_refresh !== 'boolean') {
       meta.stagger_refresh =
@@ -252,13 +265,14 @@ export function fetchCharts(
 }
 
 export const SHOW_BUILDER_PANE = 'SHOW_BUILDER_PANE';
+
 export function showBuilderPane() {
-  return { type: SHOW_BUILDER_PANE };
+  return {type: SHOW_BUILDER_PANE};
 }
 
 export function addSliceToDashboard(id, component) {
   return (dispatch, getState) => {
-    const { sliceEntities } = getState();
+    const {sliceEntities} = getState();
     const selectedSlice = sliceEntities.slices[id];
     if (!selectedSlice) {
       return dispatch(
@@ -284,7 +298,7 @@ export function addSliceToDashboard(id, component) {
     ]).then(() => {
       dispatch(addSlice(selectedSlice));
 
-      if (selectedSlice && selectedSlice.viz_type === 'filter_box') {
+      if (selectedSlice && form_data.filter_configs && form_data.filter_configs.length > 0) {
         dispatch(addFilter(id, component, selectedSlice.form_data));
       }
     });
@@ -294,7 +308,7 @@ export function addSliceToDashboard(id, component) {
 export function removeSliceFromDashboard(id) {
   return (dispatch, getState) => {
     const sliceEntity = getState().sliceEntities.slices[id];
-    if (sliceEntity && sliceEntity.viz_type === 'filter_box') {
+    if (sliceEntity && sliceEntity.form_data.filter_configs && sliceEntity.form_data.filter_configs.length > 0) {
       dispatch(removeFilter(id));
     }
 
@@ -304,8 +318,9 @@ export function removeSliceFromDashboard(id) {
 }
 
 export const SET_COLOR_SCHEME = 'SET_COLOR_SCHEME';
+
 export function setColorScheme(colorScheme) {
-  return { type: SET_COLOR_SCHEME, colorScheme };
+  return {type: SET_COLOR_SCHEME, colorScheme};
 }
 
 export function setColorSchemeAndUnsavedChanges(colorScheme) {
@@ -316,40 +331,44 @@ export function setColorSchemeAndUnsavedChanges(colorScheme) {
 }
 
 export const SET_DIRECT_PATH = 'SET_DIRECT_PATH';
+
 export function setDirectPathToChild(path) {
-  return { type: SET_DIRECT_PATH, path };
+  return {type: SET_DIRECT_PATH, path};
 }
 
 export const SET_MOUNTED_TAB = 'SET_MOUNTED_TAB';
+
 /**
  * Set if tab switch animation is in progress
  */
 export function setMountedTab(mountedTab) {
-  return { type: SET_MOUNTED_TAB, mountedTab };
+  return {type: SET_MOUNTED_TAB, mountedTab};
 }
 
 export const SET_FOCUSED_FILTER_FIELD = 'SET_FOCUSED_FILTER_FIELD';
+
 export function setFocusedFilterField(chartId, column) {
-  return { type: SET_FOCUSED_FILTER_FIELD, chartId, column };
+  return {type: SET_FOCUSED_FILTER_FIELD, chartId, column};
 }
 
 export function unsetFocusedFilterField() {
   // same ACTION as setFocusedFilterField, without arguments
-  return { type: SET_FOCUSED_FILTER_FIELD };
+  return {type: SET_FOCUSED_FILTER_FIELD};
 }
 
 // Undo history ---------------------------------------------------------------
 export const SET_MAX_UNDO_HISTORY_EXCEEDED = 'SET_MAX_UNDO_HISTORY_EXCEEDED';
+
 export function setMaxUndoHistoryExceeded(maxUndoHistoryExceeded = true) {
   return {
     type: SET_MAX_UNDO_HISTORY_EXCEEDED,
-    payload: { maxUndoHistoryExceeded },
+    payload: {maxUndoHistoryExceeded},
   };
 }
 
 export function maxUndoHistoryToast() {
   return (dispatch, getState) => {
-    const { dashboardLayout } = getState();
+    const {dashboardLayout} = getState();
     const historyLength = dashboardLayout.past.length;
 
     return dispatch(

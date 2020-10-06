@@ -17,19 +17,19 @@
  * under the License.
  */
 /* eslint-disable camelcase */
-import { isString } from 'lodash';
+import {isString} from 'lodash';
 import shortid from 'shortid';
-import { CategoricalColorNamespace } from '@superset-ui/core';
+import {CategoricalColorNamespace} from '@superset-ui/core';
 
-import { initSliceEntities } from 'src/dashboard/reducers/sliceEntities';
-import { getParam } from 'src/modules/utils';
-import { applyDefaultFormData } from 'src/explore/store';
-import { buildActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
+import {initSliceEntities} from 'src/dashboard/reducers/sliceEntities';
+import {getParam} from 'src/modules/utils';
+import {applyDefaultFormData} from 'src/explore/store';
+import {buildActiveFilters} from 'src/dashboard/util/activeDashboardFilters';
 import {
   DASHBOARD_FILTER_SCOPE_GLOBAL,
   dashboardFilter,
 } from './dashboardFilters';
-import { chart } from '../../chart/chartReducer';
+import {chart} from '../../chart/chartReducer';
 import {
   DASHBOARD_HEADER_ID,
   GRID_DEFAULT_CHART_WIDTH,
@@ -40,18 +40,18 @@ import {
   CHART_TYPE,
   ROW_TYPE,
 } from '../util/componentTypes';
-import { buildFilterColorMap } from '../util/dashboardFiltersColorMap';
+import {buildFilterColorMap} from '../util/dashboardFiltersColorMap';
 import findFirstParentContainerId from '../util/findFirstParentContainer';
 import getEmptyLayout from '../util/getEmptyLayout';
 import getFilterConfigsFromFormdata from '../util/getFilterConfigsFromFormdata';
 import getLocationHash from '../util/getLocationHash';
 import newComponentFactory from '../util/newComponentFactory';
-import { TIME_RANGE } from '../../visualizations/FilterBox/FilterBox';
+import {TIME_RANGE} from '../../visualizations/FilterBox/FilterBox';
 
 export default function getInitialState(bootstrapData) {
-  const { user_id, datasources, common, editMode, urlParams } = bootstrapData;
+  const {user_id, datasources, common, editMode, urlParams} = bootstrapData;
 
-  const dashboard = { ...bootstrapData.dashboard_data };
+  const dashboard = {...bootstrapData.dashboard_data};
   let preselectFilters = {};
   try {
     // allow request parameter overwrite dashboard metadata
@@ -79,7 +79,7 @@ export default function getInitialState(bootstrapData) {
   }
 
   // dashboard layout
-  const { position_json: positionJson } = dashboard;
+  const {position_json: positionJson} = dashboard;
   // new dash: positionJson could be {} or null
   const layout =
     positionJson && Object.keys(positionJson).length > 0
@@ -169,10 +169,10 @@ export default function getInitialState(bootstrapData) {
     }
 
     // build DashboardFilters for interactive filter features
-    if (slice.form_data.viz_type === 'filter_box') {
+    if (slice.form_data.filter_configs && slice.form_data.filter_configs.length > 0) {
       const configs = getFilterConfigsFromFormdata(slice.form_data);
-      let { columns } = configs;
-      const { labels } = configs;
+      let {columns} = configs;
+      const {labels} = configs;
       if (preselectFilters[key]) {
         Object.keys(columns).forEach(col => {
           if (preselectFilters[key][col]) {
@@ -188,7 +188,7 @@ export default function getInitialState(bootstrapData) {
         const scopeSettings = {
           ...filterScopes[key],
         };
-        const { scope, immune } = {
+        const {scope, immune} = {
           ...DASHBOARD_FILTER_SCOPE_GLOBAL,
           ...scopeSettings[column],
         };
@@ -259,7 +259,7 @@ export default function getInitialState(bootstrapData) {
 
   return {
     datasources,
-    sliceEntities: { ...initSliceEntities, slices, isLoading: false },
+    sliceEntities: {...initSliceEntities, slices, isLoading: false},
     charts: chartQueries,
     // read-only data
     dashboardInfo: {
