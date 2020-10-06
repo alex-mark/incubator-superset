@@ -326,6 +326,7 @@ class SupersetAppInitializer:
             href="/sqllab/my_queries/",
             icon="fa-save",
             category="SQL Lab",
+            category_label=__("SQL Lab"),
         )
         appbuilder.add_link(
             "Query Search",
